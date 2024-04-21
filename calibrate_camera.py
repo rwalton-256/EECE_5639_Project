@@ -17,7 +17,7 @@ def calibrate_camera(directory_path, chessboard_size=(10, 7)):
     universe_size = None
 
     # Get a list of all image file paths in the directory
-    image_paths = glob.glob(os.path.join(directory_path, "*.JPG"))
+    image_paths = glob.glob(os.path.join(directory_path, "*.jpg"))
 
     # Create a directory to save the correspondence images
     new_dir_path = os.path.join(directory_path, "correspondence_images")
@@ -52,10 +52,16 @@ def calibrate_camera(directory_path, chessboard_size=(10, 7)):
 
         print("Distortion Matrix:")
         print(dist)
+
+        print("Rotation Matrix:")
+        print(rvecs)
+
+        print("Translation Matrix:")
+        print(tvecs)
     else:
         print("Camera calibration unsuccessful.")
 
 
 if __name__ == "__main__":
-    directory_path = 'drone_calibration'
+    directory_path = 'Camera2_Calibration'
     calibrate_camera(directory_path)
