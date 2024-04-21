@@ -2,10 +2,12 @@ import cv2 as cv
 import cv2
 import numpy as np
 
-cap = cv.VideoCapture("IMG_6679.MOV") 
+cap = cv.VideoCapture("data/ryans_iphone/calibration/IMG_6733.MOV") 
 
-objp = np.zeros((6*9,3), np.float32)
-objp[:,:2] = np.mgrid[0:6,0:9].T.reshape(-1,2)
+chessboard_size = (6,8)
+
+objp = np.zeros((chessboard_size[0]*chessboard_size[1],3), np.float32)
+objp[:,:2] = np.mgrid[0:chessboard_size[0],0:chessboard_size[1]].T.reshape(-1,2)
 
 objpoints=[]
 imgpoints=[]
@@ -18,17 +20,17 @@ while True:
     if not ret:
         break
 
-    frame = cv2.resize(frame, (1280,720), interpolation =cv2.INTER_AREA)
+    print(frame.shape)
+    #frame = cv2.resize(frame, (1280,720), interpolation =cv2.INTER_AREA)
 
     gray = cv2.cvtColor( frame, cv2.COLOR_BGR2GRAY )
 
-    ret, corners = cv2.findChessboardCorners( gray, (6,9), None )
+    #cv2.imshow('img', cv2.resize( gray, ( gray.shape[1]//3,gray.shape[0]//3 )))
+    #cv2.waitKey(1)
+
+    ret, corners = cv2.findChessboardCorners( gray, chessboard_size,  cv2.CALIB_USE_INTRINSIC_GUESS)
 
     if not ret:
-        continue
-
-    i += 1
-    if i % 2:
         continue
 
     objpoints.append(objp)
@@ -36,7 +38,7 @@ while True:
     corners2 = cv2.cornerSubPix( gray, corners, (11,11), (-1,-1), (cv2.TermCriteria_EPS + cv2.TermCriteria_MAX_ITER, 30, 0.001 ) )
     imgpoints.append(corners2)
 
-    frame = cv2.resize( cv2.drawChessboardCorners( frame, (6,9), corners2, ret ), (frame.shape[1]//3,frame.shape[0]//3) )
+    frame = cv2.resize( cv2.drawChessboardCorners( frame, chessboard_size, corners2, ret ), (frame.shape[1]//3,frame.shape[0]//3) )
 
     cv2.imshow('img', frame)
     cv2.waitKey(1)
