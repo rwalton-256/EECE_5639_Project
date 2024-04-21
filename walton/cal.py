@@ -2,9 +2,9 @@ import cv2 as cv
 import cv2
 import numpy as np
 
-cap = cv.VideoCapture("data/ryans_iphone/calibration/IMG_6733.MOV") 
+cap = cv.VideoCapture("calibration_videos/Camera2_Femi.MOV")
 
-chessboard_size = (6,8)
+chessboard_size = (10,7)
 
 objp = np.zeros((chessboard_size[0]*chessboard_size[1],3), np.float32)
 objp[:,:2] = np.mgrid[0:chessboard_size[0],0:chessboard_size[1]].T.reshape(-1,2)
@@ -17,9 +17,14 @@ i = 0
 while True:
     ret,frame = cap.read()
 
+    if i % 10 != 0:
+        i += 1
+        continue
+
     if not ret:
         break
 
+    i += 1
     print(frame.shape)
     #frame = cv2.resize(frame, (1280,720), interpolation =cv2.INTER_AREA)
 

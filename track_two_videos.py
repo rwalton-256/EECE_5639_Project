@@ -10,12 +10,12 @@ model1 = YOLO('yolov8n.pt')
 model2 = YOLO('yolov8n.pt')
 
 # Load videos 1 and 2
-video1_path = "vid1" + ".mp4"
+video1_path = "Camera1_Femi_Walking.MOV"
 cap1 = cv2.VideoCapture(video1_path)
 fps1 = cap1.get(cv2.CAP_PROP_FPS)
 image_width1, image_height1 = int(cap1.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-video2_path = "vid2" + ".mp4"
+video2_path = "Camera2_Femi_Walking.MOV"
 cap2 = cv2.VideoCapture(video2_path)
 fps2 = cap2.get(cv2.CAP_PROP_FPS)
 image_width2, image_height2 = int(cap2.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap2.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -34,10 +34,11 @@ track_history2 = defaultdict(lambda: [])
 
 # IMPORTANT: IF YOU ARE NOT RUNNING ON AN APPLE SILICON DEVICE, CHANGE MPS TO EITHER CPU OR NVIDIA, DEPENDING ON WHAT
 # YOU HAVE
-model1.to("mps")
-model2.to("mps")
+# model1.to("mps")
+# model2.to("mps")
 
-model1.share_memory(model2)
+model1.share_memory()
+model2.share_memory()
 
 while True:
 
@@ -62,22 +63,22 @@ while True:
     annotated_frame2 = results2[0].plot()
 
     # Process all detections in video 1 to plot the trajectory of the target(s) on the frame
-    if results1[0].boxes.target_id is not None:
+    if results1[0].boxes.id is not None:
         boxes = results1[0].boxes.xywh.cpu().numpy()
-        track_ids = results1[0].boxes.target_id.int().cpu().numpy()
+        track_ids = results1[0].boxes.id.int().cpu().numpy()
 
         for i in range(boxes.shape[0]):
             x, y, w, h = boxes[i]
             target_id = track_ids[i]
             color = colors[target_id]
             track_history1[target_id].append((float(x), float(y)))
-            pts1 = np.array(track_history1[target_id], np.int32).reshape((-1, 1, 2))
-            cv2.polylines(annotated_frame1, [pts1], isClosed=True, color=color, thickness=3)
+            pts1 = np.hstack(track_history1[target_id]).astype(np.int32).reshape((-1, 1, 2))
+            cv2.polylines(annotated_frame1, [pts1], isClosed=False, color=color, thickness=10)
 
     # Process all detections in video 2 to plot the trajectory of the target(s) on the frame
-    if results2[0].boxes.target_id is not None:
-        boxes = results1[0].boxes.xywh.cpu().numpy()
-        track_ids = results1[0].boxes.target_id.int().cpu().numpy()
+    if results2[0].boxes.id is not None:
+        boxes = results2[0].boxes.xywh.cpu().numpy()
+        track_ids = results2[0].boxes.id.int().cpu().numpy()
 
         for i in range(boxes.shape[0]):
             x, y, w, h = boxes[i]
@@ -85,13 +86,14 @@ while True:
             color = colors[target_id]
             track_history2[target_id].append((float(x), float(y)))
 
-            pts2 = np.array(track_history2[target_id], np.int32).reshape((-1, 1, 2))
-            cv2.polylines(annotated_frame2, [pts2], isClosed=True, color=color, thickness=3)
+            pts2 = np.hstack(track_history2[target_id]).astype(np.int32).reshape((-1, 1, 2))
+            cv2.polylines(annotated_frame2, [pts2], isClosed=False, color=color, thickness=10)
 
     # Display the processed frames
     cv2.imshow('Video 1', annotated_frame1)
     cv2.imshow('Video 2', annotated_frame2)
-
+    out1.write(annotated_frame1)
+    out2.write(annotated_frame2)
     # Exit the loop if the user presses the 'q' key
     if cv2.waitKey(1) == ord('q'):
         break
