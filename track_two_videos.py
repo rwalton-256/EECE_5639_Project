@@ -1,3 +1,4 @@
+import json
 import random
 from collections import defaultdict
 
@@ -10,12 +11,12 @@ model1 = YOLO('yolov8n.pt')
 model2 = YOLO('yolov8n.pt')
 
 # Load videos 1 and 2
-video1_path = "Camera1_Femi_Walking.MOV"
+video1_path = "Camera1_Femi_Running_Test3.mov"
 cap1 = cv2.VideoCapture(video1_path)
 fps1 = cap1.get(cv2.CAP_PROP_FPS)
 image_width1, image_height1 = int(cap1.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-video2_path = "Camera2_Femi_Walking.MOV"
+video2_path = "Camera2_Femi_Running_Test3.mov"
 cap2 = cv2.VideoCapture(video2_path)
 fps2 = cap2.get(cv2.CAP_PROP_FPS)
 image_width2, image_height2 = int(cap2.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap2.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -32,13 +33,20 @@ colors = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255
 track_history1 = defaultdict(lambda: [])
 track_history2 = defaultdict(lambda: [])
 
-# IMPORTANT: IF YOU ARE NOT RUNNING ON AN APPLE SILICON DEVICE, CHANGE MPS TO EITHER CPU OR NVIDIA, DEPENDING ON WHAT
-# YOU HAVE
-# model1.to("mps")
-# model2.to("mps")
-
 model1.share_memory()
 model2.share_memory()
+
+
+# IMPORTANT: IF YOU ARE NOT RUNNING ON AN APPLE SILICON DEVICE, CHANGE MPS TO EITHER CPU OR NVIDIA, DEPENDING ON WHAT
+# YOU HAVE
+model1.to("mps")
+model2.to("mps")
+
+vid1_frame = 0
+vid2_frame = 0
+
+track_history1_dict = dict()
+track_history2_dict = dict()
 
 while True:
 
@@ -52,11 +60,11 @@ while True:
 
     # Process the first frame using the first model. IMPORTANT: IF YOU ARE NOT RUNNING ON AN APPLE SILICON DEVICE,
     # CHANGE MPS TO EITHER CPU OR NVIDIA, DEPENDING ON WHAT YOU HAVE
-    results1 = model1.track(frame1, classes=[0], verbose=False, persist=True, tracker="bytetrack.yaml", device="mps")
+    results1 = model1.track(frame1, classes=[0], verbose=False, persist=True, tracker="bytetrack.yaml", device="mps", conf=0.4)
 
     # Process the second frame using the second model. IMPORTANT: IF YOU ARE NOT RUNNING ON AN APPLE SILICON DEVICE,
     # CHANGE MPS TO EITHER CPU OR NVIDIA, DEPENDING ON WHAT YOU HAVE
-    results2 = model2.track(frame2, classes=[0], verbose=False, persist=True, tracker="bytetrack.yaml", device="mps")
+    results2 = model2.track(frame2, classes=[0], verbose=False, persist=True, tracker="bytetrack.yaml", device="mps", conf=0.4)
 
     # Plot the processed frames and the results of the models
     annotated_frame1 = results1[0].plot()
@@ -72,6 +80,7 @@ while True:
             target_id = track_ids[i]
             color = colors[target_id]
             track_history1[target_id].append((float(x), float(y)))
+            track_history1_dict[vid1_frame] = (float(x), float(y))
             pts1 = np.hstack(track_history1[target_id]).astype(np.int32).reshape((-1, 1, 2))
             cv2.polylines(annotated_frame1, [pts1], isClosed=False, color=color, thickness=10)
 
@@ -85,13 +94,20 @@ while True:
             target_id = track_ids[i]
             color = colors[target_id]
             track_history2[target_id].append((float(x), float(y)))
-
+            track_history2_dict[vid2_frame] = (float(x), float(y))
             pts2 = np.hstack(track_history2[target_id]).astype(np.int32).reshape((-1, 1, 2))
             cv2.polylines(annotated_frame2, [pts2], isClosed=False, color=color, thickness=10)
 
+    vid1_frame += 1
+    vid2_frame += 1
+
     # Display the processed frames
+    cv2.namedWindow('Video 1', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('Video 2', cv2.WINDOW_NORMAL)
     cv2.imshow('Video 1', annotated_frame1)
     cv2.imshow('Video 2', annotated_frame2)
+    cv2.resizeWindow('Video 1', (960, 540))
+    cv2.resizeWindow('Video 2', (960, 540))
     out1.write(annotated_frame1)
     out2.write(annotated_frame2)
     # Exit the loop if the user presses the 'q' key
@@ -104,3 +120,12 @@ cap2.release()
 out1.release()
 out2.release()
 cv2.destroyAllWindows()
+
+
+# Write track_history1 to a JSON file
+with open('cam1_track_test3_running.json', 'w') as f:
+    json.dump(track_history1_dict, f)
+
+# Write track_history2 to a JSON file
+with open('cam2_track_test3_running.json', 'w') as f:
+    json.dump(track_history2_dict, f)
