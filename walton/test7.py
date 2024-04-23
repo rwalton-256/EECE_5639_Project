@@ -32,6 +32,9 @@ x, y, w, h = roi
 print(newcameramtx)
 print(roi)
 
+out_1 = cv.VideoWriter("Camera1.mp4", cv2.VideoWriter_fourcc(*'MJPG'), 30, (1920, 1080))
+out_2 = cv.VideoWriter("Camera2.mp4", cv2.VideoWriter_fourcc(*'MJPG'), 30, (1920, 1080))
+
 try:
     for i in range(287):
         ret,frame1 = cap1.read()
@@ -46,6 +49,9 @@ try:
         #frame1 = np.array(frame1).astype(np.float32) / 256
         #frame2 = np.array(frame2).astype(np.float32) / 256
         frame2 = cv2.resize(frame2, (1920,1080), interpolation =cv2.INTER_AREA)
+
+        out_1.write(frame1)
+        out_2.write(frame2)
 
         frame1_und = cv.undistort(frame1, m_int, m_dist, None, newcameramtx)
         frame2_und = cv.undistort(frame2, m_int, m_dist, None, newcameramtx)

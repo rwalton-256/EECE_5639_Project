@@ -82,12 +82,14 @@ frames2 = np.load( "frames2.npy" )
 
 dog = get_gaussian_kernel( 15, 2 ) - get_gaussian_kernel( 15, 6 )
 
-plt.imshow(dog)
-plt.colorbar()
-plt.show()
+#plt.imshow(dog)
+#plt.colorbar()
+#plt.show()
 
 frame1_avg = frames1[0,:,:,:]
 frame2_avg = frames2[0,:,:,:]
+
+print(frame1_avg.shape)
 
 for i in range( 0, 300 ):
 
@@ -115,16 +117,36 @@ for i in range( 0, 300 ):
     diff1 = np.clip( diff1, a_min=0, a_max=1 )
     diff2 = np.clip( diff2, a_min=0, a_max=1 )
 
+    diff1[np.where(diff1>0.8)] = 1
+    diff1[np.where(diff1<=0.8)] = 0
+    diff2[np.where(diff2>0.8)] = 1
+    diff2[np.where(diff2<=0.8)] = 0
+
+    cv2.namedWindow("Camera 1", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("Camera 2", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("Diff 1", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("Diff 2", cv2.WINDOW_NORMAL)
+
     cv2.imshow("Camera 1",frame1)
     cv2.imshow("Camera 2",frame2)
     cv2.imshow("Diff 1",diff1)
     cv2.imshow("Diff 2",diff2)
 
-    frame1_avg *= 0.98
+    cv2.resizeWindow("Camera 1", (640,360))
+    cv2.resizeWindow("Camera 2", (640,360))
+    cv2.resizeWindow("Diff 1", (640,360))
+    cv2.resizeWindow("Diff 2", (640,360))
+
+    frame1_avg = frame1_avg * 0.98
     frame1_avg += 0.02 * frame1
-    frame2_avg *= 0.98
+    frame2_avg = frame2_avg * 0.98
     frame2_avg += 0.02 * frame2
 
-    if cv.waitKey(1000000) & 0xFF == ord('q'): 
+    key = cv.waitKey(1000000) & 0xFF
+    if key == ord('q'): 
         exit(0)
+    elif key == ord('s'): 
+        plt.imshow(diff1)
+        plt.colorbar()
+        plt.show()
 
