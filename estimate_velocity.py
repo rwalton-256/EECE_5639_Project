@@ -47,7 +47,7 @@ velocities = np.diff(points_3d, axis=0) / delta_t
 
 # Remove the z-component, y-component, or x-component of the velocity
 velocities[:, 2] = 0
-velocities[:, 1] = 0
+# velocities[:, 1] = 0
 # velocities[:, 0] = 0
 
 # Convert velocities to magnitude and then to meters per second
@@ -70,7 +70,7 @@ plt.figure()
 plt.plot(time, smoothed_speeds_mps)
 plt.xlabel('Time (s)')
 plt.ylabel('Smoothed Speed (m/s)')
-plt.xlim([0, 15])
-plt.ylim([0, 14])
+# plt.xlim([0, 15])
+# plt.ylim([0, 3])
 
 plt.show()
