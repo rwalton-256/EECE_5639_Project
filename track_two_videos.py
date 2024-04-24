@@ -11,20 +11,20 @@ model1 = YOLO('yolov8n.pt')
 model2 = YOLO('yolov8n.pt')
 
 # Load videos 1 and 2
-video1_path = "Camera1_Femi_Running_Test3.mov"
+video1_path = "Camera1_Running_Test3.mov"
 cap1 = cv2.VideoCapture(video1_path)
 fps1 = cap1.get(cv2.CAP_PROP_FPS)
 image_width1, image_height1 = int(cap1.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-video2_path = "Camera2_Femi_Running_Test3.mov"
+video2_path = "Camera2_Running_Test3.mov"
 cap2 = cv2.VideoCapture(video2_path)
 fps2 = cap2.get(cv2.CAP_PROP_FPS)
 image_width2, image_height2 = int(cap2.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Writes the processed videos to these files
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out1 = cv2.VideoWriter('output1.mp4', fourcc, fps1, (image_width1, image_height1))
-out2 = cv2.VideoWriter('output2.mp4', fourcc, fps2, (image_width2, image_height2))
+out1 = cv2.VideoWriter('test3_output1.mp4', fourcc, fps1, (image_width1, image_height1))
+out2 = cv2.VideoWriter('test3_output2.mp4', fourcc, fps2, (image_width2, image_height2))
 
 # An array to store the unique color for each identified target
 colors = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for _ in range(10)]
@@ -102,12 +102,12 @@ while True:
     vid2_frame += 1
 
     # Display the processed frames
-    cv2.namedWindow('Video 1', cv2.WINDOW_NORMAL)
-    cv2.namedWindow('Video 2', cv2.WINDOW_NORMAL)
-    cv2.imshow('Video 1', annotated_frame1)
-    cv2.imshow('Video 2', annotated_frame2)
-    cv2.resizeWindow('Video 1', (960, 540))
-    cv2.resizeWindow('Video 2', (960, 540))
+    # cv2.namedWindow('Video 1', cv2.WINDOW_NORMAL)
+    # cv2.namedWindow('Video 2', cv2.WINDOW_NORMAL)
+    # cv2.imshow('Video 1', annotated_frame1)
+    # cv2.imshow('Video 2', annotated_frame2)
+    # cv2.resizeWindow('Video 1', (960, 540))
+    # cv2.resizeWindow('Video 2', (960, 540))
     out1.write(annotated_frame1)
     out2.write(annotated_frame2)
     # Exit the loop if the user presses the 'q' key
@@ -123,9 +123,9 @@ cv2.destroyAllWindows()
 
 
 # Write track_history1 to a JSON file
-with open('cam1_track_test3_running.json', 'w') as f:
+with open('cam1_track_test3.json', 'w') as f:
     json.dump(track_history1_dict, f)
 
 # Write track_history2 to a JSON file
-with open('cam2_track_test3_running.json', 'w') as f:
+with open('cam2_track_test3.json', 'w') as f:
     json.dump(track_history2_dict, f)

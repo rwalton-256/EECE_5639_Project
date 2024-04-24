@@ -5,19 +5,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
-# Conversion factor from feet to meters
-ft_to_m = 0.3048
-
 P1 = np.array([
-    [3180.19960, 0, 1924.28143, 0],
-    [0, 3181.31959, 1070.18431, 0],
-    [0, 0, 1, 0]
+    [3.18019960e+03, 0.00000000e+00, 1.92428143e+03, 0.00000000e+00],
+    [0.00000000e+00, 3.18131959e+03, 1.07018431e+03, 0.00000000e+00],
+    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00, 0.00000000e+00]
 ])
 
 P2 = np.array([
-    [3714.48717, -58.5014142, 325.311697, 14299.4368],
-    [512.747211, 3116.48947, 1198.01542, 1449.5094],
-    [0.438567875, -0.0645848787, 0.896374371, 1.40418289]
+    [3.71448717e+03, -5.85014142e+01, 3.25311697e+02, 4.33265470e+03],
+    [5.12747211e+02, 3.11648947e+03, 1.19801542e+03, 4.39193783e+02],
+    [4.38567875e-01, -6.45848787e-02, 8.96374371e-01, 4.25460086e-01]
 ])
 
 cam1_track = []
@@ -51,7 +48,7 @@ velocities[:, 2] = 0
 # velocities[:, 0] = 0
 
 # Convert velocities to magnitude and then to meters per second
-speeds_mps = np.linalg.norm(velocities, axis=1) * ft_to_m
+speeds_mps = np.linalg.norm(velocities, axis=1)
 
 # Apply Savitzky-Golay smoothing
 window_length = 51  # Window length should be odd and >= the order of the polynomial.
